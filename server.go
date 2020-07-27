@@ -1,16 +1,17 @@
 package main
 
 import (
-	//"context"
+	"context"
 	"fmt"
 	"html/template"
-	//"log"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
-	//"cloud.google.com/go/datastore"
+	"cloud.google.com/go/datastore"
 	"github.com/gin-contrib/multitemplate"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -31,8 +32,6 @@ var config = serverConfig{
 	GCPProject: "",
 }
 
-var t *template.Template
-
 func init() {
 	envPort := os.Getenv("PORT")
 	if envPort != "" {
@@ -44,14 +43,14 @@ func init() {
 }
 
 type School struct {
-	Name string
-	Slug string
+	Name string `json:"name"`
+	Slug string `json:"slug"`
 }
 
 type Concern struct {
-	Title       string
-	Description template.HTML
-	Slug        string
+	Title       string        `json:"title"`
+	Description template.HTML `json:"description"`
+	Slug        string        `json:"slug"`
 }
 
 type LetterForm struct {
@@ -66,12 +65,14 @@ type LetterForm struct {
 }
 
 type Letter struct {
-	ID          string
-	Email       string
-	Name        string
-	NumChildren int
-	Schools     []School
-	Concerns    []Concern
+	Key         *datastore.Key `datastore:"__key__" json:"-"`
+	ID          string         `json:"id"`
+	Email       string         `json:"email"`
+	Name        string         `json:"name"`
+	NumChildren int            `json:"numChildren"`
+	Schools     []School       `json:schools`
+	Concerns    []Concern      `json:concerns`
+	CreatedAt   time.Time      `json:createdAt`
 }
 
 var letterDB = map[string]Letter{}
@@ -85,7 +86,6 @@ func formToLetter(form LetterForm) Letter {
 	letter.Name = form.Name
 	letter.NumChildren = form.NumChildren
 	for _, slug := range form.Schools {
-		// Replace slug with name.
 		letter.Schools = append(letter.Schools, schoolDB[slug])
 	}
 	for _, slug := range form.Concerns {
@@ -114,20 +114,35 @@ func letterToForm(letter Letter) LetterForm {
 	return form
 }
 
+func persistLetter(ctx context.Context, letter Letter, client *datastore.Client) error {
+	newKey := datastore.NameKey("Letter", letter.ID, nil)
+	letter.CreatedAt = time.Now()
+
+	_, err := client.Put(ctx, newKey, &letter)
+	if err != nil {
+		log.Println("Failed to persist letter: ", err)
+		return err
+	}
+	return nil
+}
+
+func getLetter(ctx context.Context, id string, client *datastore.Client) (Letter, error) {
+	var letter Letter
+
+	k := datastore.NameKey("Letter", id, nil)
+	if err := client.Get(ctx, k, &letter); err != nil {
+		return letter, err
+	}
+
+	return letter, nil
+}
+
 func main() {
-	/*
-		ctx := context.Background()
-		dsClient, err := datastore.NewClient(ctx, config.GCPProject)
-		if err != nil {
-			log.Fatalf("Failed to connect to Datastore: %v", err)
-		}
-
-		k := datastore.NameKey("School", "stringID", nil)
-		e := new(School)
-
-		if err = dsClient.Get(ctx, k, e); err != nil {
-		}
-	*/
+	ctx := context.Background()
+	dsClient, err := datastore.NewClient(ctx, config.GCPProject)
+	if err != nil {
+		log.Fatalf("Failed to connect to Datastore: %v", err)
+	}
 
 	r := gin.Default()
 	r.SetFuncMap(template.FuncMap{
@@ -206,6 +221,16 @@ func main() {
 		})
 	})
 
+	r.GET("/list-all", func(c *gin.Context) {
+		var letters []Letter
+		q := datastore.NewQuery("Letter")
+		if _, err := dsClient.GetAll(ctx, q, &letters); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, letters)
+	})
+
 	r.POST("/", func(c *gin.Context) {
 		var form LetterForm
 		if err := c.ShouldBind(&form); err != nil {
@@ -213,6 +238,9 @@ func main() {
 			return
 		}
 		letter := formToLetter(form)
+		if err := persistLetter(ctx, letter, dsClient); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
 		letterDB[letter.ID] = letter
 
 		c.Redirect(http.StatusFound, fmt.Sprintf("/letter/preview/%s", letter.ID))
@@ -220,9 +248,26 @@ func main() {
 
 	r.GET("/letter/preview/:id", func(c *gin.Context) {
 		urlID := c.Param("id")
-		letter, found := letterDB[urlID]
-		if !found {
+
+		if urlID == "foo" {
+			foo := letterDB["foo"]
+
+			c.HTML(http.StatusOK, "preview.html", gin.H{
+				"title":  "Preview",
+				"letter": foo,
+			})
+			return
+		}
+
+		letter, err := getLetter(ctx, urlID, dsClient)
+
+		if err == datastore.ErrNoSuchEntity {
 			c.HTML(http.StatusNotFound, "404.html", gin.H{})
+			return
+		}
+
+		if err != nil {
+			c.HTML(http.StatusInternalServerError, "500.html", gin.H{"error": err.Error()})
 			return
 		}
 
@@ -293,7 +338,7 @@ func loadTemplates(templatesDir string) multitemplate.Renderer {
 		layoutCopy := make([]string, len(layouts))
 		copy(layoutCopy, layouts)
 		files := append(layoutCopy, include)
-		t = r.AddFromFilesFuncs(filepath.Base(include), funcMap, files...)
+		r.AddFromFilesFuncs(filepath.Base(include), funcMap, files...)
 	}
 	return r
 }
