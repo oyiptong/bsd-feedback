@@ -156,11 +156,6 @@ func main() {
 	}
 
 	r := gin.Default()
-	r.SetFuncMap(template.FuncMap{
-		"plus1": func(x int) int {
-			return x + 1
-		},
-	})
 	r.HTMLRender = loadTemplates("./templates")
 	r.Use(static.Serve("/static/", static.LocalFile("./static", false)))
 
