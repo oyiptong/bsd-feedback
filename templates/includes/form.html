@@ -77,7 +77,9 @@
 
       <article>
         <header>Any additional feedback (free-form)</header>
-        <textarea id="freeform" cols="78" rows="5" name="freeform">{{ .form.FreeForm }}</textarea>
+        <div class="textarea-container">
+          <textarea id="freeform" rows="5" name="freeform">{{ .form.FreeForm }}</textarea>
+        </div>
       </article>
     </fieldset>
   </section>

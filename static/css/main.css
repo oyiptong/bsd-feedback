@@ -356,3 +356,11 @@ nav > ol {
 pre {
     clear: both;
 }
+
+.textarea-container {
+    padding-right: 5px;
+}
+
+textarea {
+    width: 100%;
+}
