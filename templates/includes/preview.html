@@ -23,10 +23,11 @@ Sincerely,
     <header>
       BSD Feedback Email Preview
     </header>
+    <p>Thank you for sending this letter to the Burlingame School District Superintendent. This will ensure the voices of parents like you are heard.</p>
   </section>
   <section>
     <nav>
-      <button onclick="sendEmail({{ .letter.ID }})">Click to Send Email</button>
+      <button onclick="sendEmail({{ .letter.ID }}, {{ .letter.SendCount }})">Click to Send Email</button>
     </nav>
     <pre id="letter-preview">
       {{ template "letter-content" . }}

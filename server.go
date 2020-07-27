@@ -70,14 +70,16 @@ type LetterForm struct {
 }
 
 type Letter struct {
-	Key         *datastore.Key `datastore:"__key__" json:"-"`
-	ID          string         `json:"id"`
-	Email       string         `json:"email"`
-	Name        string         `json:"name"`
-	NumChildren int            `json:"numChildren"`
-	Schools     []School       `json:schools`
-	Concerns    []Concern      `json:concerns`
-	CreatedAt   time.Time      `json:createdAt`
+	Key          *datastore.Key `datastore:"__key__" json:"-"`
+	ID           string         `json:"id"`
+	Email        string         `json:"email"`
+	Name         string         `json:"name"`
+	NumChildren  int            `json:"numChildren"`
+	Schools      []School       `json:schools`
+	Concerns     []Concern      `json:concerns`
+	CreatedAt    time.Time      `json:createdAt`
+	SendCount    int            `json:sendCount`
+	SentReceipts []time.Time    `json:sentReceipts`
 }
 
 var letterDB = map[string]Letter{}
@@ -244,9 +246,9 @@ func main() {
 		}
 		letter := formToLetter(form)
 		if err := persistLetter(ctx, letter, dsClient); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
-		letterDB[letter.ID] = letter
 
 		c.Redirect(http.StatusFound, fmt.Sprintf("/letter/preview/%s", letter.ID))
 	})
@@ -284,8 +286,19 @@ func main() {
 
 	r.GET("/letter/edit/:id", func(c *gin.Context) {
 		urlID := c.Param("id")
-		letter, found := letterDB[urlID]
-		if !found {
+
+		if urlID == "foo" {
+			foo := letterDB["foo"]
+
+			c.HTML(http.StatusOK, "preview.html", gin.H{
+				"title":  "Preview",
+				"letter": foo,
+			})
+			return
+		}
+
+		letter, err := getLetter(ctx, urlID, dsClient)
+		if err == datastore.ErrNoSuchEntity {
 			c.HTML(http.StatusNotFound, "404.html", gin.H{})
 			return
 		}
@@ -302,9 +315,24 @@ func main() {
 
 	r.POST("/letter/record-send/:id", func(c *gin.Context) {
 		urlID := c.Param("id")
-		_, found := letterDB[urlID]
-		if !found {
-			c.JSON(http.StatusNotFound, "not found")
+
+		letter, err := getLetter(ctx, urlID, dsClient)
+
+		if err == datastore.ErrNoSuchEntity {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		letter.SendCount += 1
+		letter.SentReceipts = append(letter.SentReceipts, time.Now())
+
+		if err := persistLetter(ctx, letter, dsClient); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
