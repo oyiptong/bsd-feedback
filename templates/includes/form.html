@@ -77,15 +77,20 @@
 
       <article>
         <header>Any additional feedback (free-form)</header>
-        <input id="freeform" type="text" name="freeform" value="{{ .form.FreeForm }}" maxlength="300" />
+        <textarea id="freeform" cols="78" rows="5" name="freeform">{{ .form.FreeForm }}</textarea>
       </article>
     </fieldset>
   </section>
 
 
   <section>
-    <input type="submit" value="Preview Email">
-    <p>Note: Clicking submit will save the form information and generate an email preview.</p>
+    <input type="submit" value="Save and Preview Email">
+
+    <h2>Privacy note</h2>
+    <p>Clicking submit will save the form information and generate an email preview.</p>
+    <p>Your contact information and statistics are being recorded. This includes your email address and name.</p>
+    <p>This data will not be shared with any other party and is recorded so that you can get access to your letter in the future.</p>
+    <p>Anonymized, aggregate statistics about your responses will be shared with the superintendent.</p>
   </section>
   </form>
 
