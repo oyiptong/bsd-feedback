@@ -1,0 +1,88 @@
+{{ define "content" }}
+<main>
+  <section>
+    <div class="top-bar"></div>
+    <header>
+      Burlingame School District<br/>Back to School Feedback
+    </header>
+
+    <h2>Planning concerns</h2>
+    <p>BSD is attempting a hybrid plan in order to give all families options and access to the best form of education for their child. However, the plan, while noble, is rumored to not have the support of the teachers because the teachers do not believe they can teach in person in a safe manner.</p>
+    <p>They also don’t believe that either branch of the plan has been sufficiently fleshed out or that the teachers are being sufficiently prepared for teaching under either option.</p>
+
+    <h2>Distance Learning concerns</h2>
+    <p>We understand that the teacher’s preference would be to start the school year out with a full DL plan. Is what parents have heard about teachers’ view of the hybrid plan and their preference to start the school year with a full DL model true?  If so, what attempts are being made to reconcile these concerns?</p>
+
+    <p>Many of us would have opted for a Distance Learning option if, for example, the teachers assigned to the groups were from our Home School.</p>
+
+    <h2>Fill the form now, make your voice heard!</h2>
+    <p>This form will take some of the concerns you may have and send them to the superintendent. If enough of us make our voices heard, we can make the change we want.</p>
+    <p>You can do this in 3 easy steps:</p>
+    <ol>
+      <li>Fill the form</li>
+      <li>Preview the email</li>
+      <li>Click to send the email to the superintendent</li>
+    </ol>
+</p>
+  </section>
+
+  <form action="/" method="post">
+    <input id="id" type="hidden" name="id" value="{{ .form.ID }}"/>
+  <section>
+    <label>Please enter your email address</label>
+    <br/>
+    <input id="email" autocomplete="email" type="email" name="email" value="{{ .form.Email }}" required/>
+  </section>
+
+  <section>
+    <label>Please enter your full name</label>
+    <br/>
+    <input id="name" type="text" name="name" value="{{ .form.Name }}" required/>
+  </section>
+
+  <section>
+    <label>Number of children in the Burlingame School District</label>
+    <br/>
+    <input id="children" type="number" min="1" max="10" name="children" value="{{ .form.NumChildren }}" required/>
+  </section>
+
+  <section>
+    <fieldset>
+      <legend>Schools you are affiliated with</legend>
+
+      {{ $schoolMap := .form.SchoolsChecked }}
+      {{ range .schools }}
+      <input id="{{ .Slug }}" type="checkbox" name="schools" value="{{ .Slug }}" {{ if (isChecked .Slug $schoolMap) }}checked{{ end }}/>
+      <label for="{{ .Slug }}">{{.Name}}</label>
+      <br/>
+      {{ end }}
+
+    </fieldset>
+  </section>
+
+  <section>
+    <fieldset>
+      <legend>Pick one or more concerns to include in the email</legend>
+
+      {{ $concernMap := .form.ConcernsChecked }}
+      {{ range .concerns }}
+      <article>
+        <header>{{ .Title }}</header>
+        <p>{{ .Description }}</p>
+
+        <input id="{{ .Slug }}" type="checkbox" name="concerns" value="{{ .Slug }}" {{ if (isChecked .Slug $concernMap) }}checked{{ end }}/>
+        <label for="{{ .Slug }}">Pick this concern</label>
+      </article>
+      {{ end }}
+    </fieldset>
+  </section>
+
+
+  <section>
+    <input type="submit" value="Preview Email">
+  </section>
+  </form>
+
+</main>
+
+{{ end }}

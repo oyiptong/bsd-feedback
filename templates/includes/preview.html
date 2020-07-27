@@ -1,0 +1,37 @@
+{{ define "letter-content" }}
+Dear Mr Chris Mount-Benites,
+
+My name is {{ .letter.Name }}.
+
+I have {{ .letter.NumChildren }} {{ if (gt .letter.NumChildren 1) }}children{{ else }} child {{ end }} attending {{$n := (len .letter.Schools) }}{{ range $i, $school := .letter.Schools }}{{ if $i }}, {{ end }}{{ if eq (plus1 $i) $n }}and {{ end }}{{$school.Name}}{{ end }}.
+
+I'd like to express my thoughts about the options we have for school reopening in Fall 2020:
+{{ range .letter.Concerns }}
+{{ .Title }}
+
+{{ .Description }}
+{{ end }}
+
+Sincerely,
+
+{{ .letter.Name }}, a concerned community member.
+{{ end }}
+
+{{ define "content" }}
+<main>
+  <section>
+    <header>
+      BSD Feedback Email Preview
+    </header>
+  </section>
+  <section>
+    <nav>
+      <button onclick="sendEmail({{ .letter.ID }})">Click to Send Email</button>
+    </nav>
+    <pre id="letter-preview">
+      {{ template "letter-content" . }}
+    </pre>
+  </section>
+</main>
+<script src="/static/js/mail_button.js"></script>
+{{ end }}
