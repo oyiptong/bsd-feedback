@@ -14,3 +14,18 @@ function sendEmail(letterID, sendCount) {
     document.location.href = href;
   });
 }
+
+window.addEventListener('DOMContentLoaded', (event) => {
+  const fbContainer = document.querySelector('#fb-share');
+  const iframe = document.createElement('iframe');
+  const currentURL = encodeURIComponent(window.location.href);
+  iframe.src = `https://www.facebook.com/plugins/share_button.php?href=${currentURL}&layout=button&size=small&width=67&height=20`;
+  iframe.width = "67";
+  iframe.height = "20";
+  iframe.style = "border:none;overflow:hidden";
+  iframe.scrolling = "no";
+  iframe.frameborder = "0";
+  iframe.allowTransparency = "true";
+  iframe.allow = "encrypted-media";
+  fbContainer.appendChild(iframe);
+});

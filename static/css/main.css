@@ -340,3 +340,19 @@ section article > header {
 section pre {
     white-space: pre-wrap;
 }
+
+nav > ol li {
+    display: inline;
+    list-style-type: none;
+    padding-right: 10px;
+    float: left;
+}
+
+nav > ol {
+    padding: 0;
+    margin: 0;
+}
+
+pre {
+    clear: both;
+}

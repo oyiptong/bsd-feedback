@@ -283,7 +283,7 @@ func main() {
 		}
 
 		c.HTML(http.StatusOK, "preview.html", gin.H{
-			"title":  "Preview",
+			"title":  "Letter to the BSD Superintendent",
 			"letter": letter,
 		})
 	})

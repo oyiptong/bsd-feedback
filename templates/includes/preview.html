@@ -25,10 +25,21 @@ Sincerely,
       BSD Feedback Email Preview
     </header>
     <p>Thank you for sending this letter to the Burlingame School District Superintendent. This will ensure the voices of parents like you are heard.</p>
+    <p>You can keep track of the URL if you want to get back to this page.</p>
   </section>
   <section>
     <nav>
-      <button onclick="sendEmail({{ .letter.ID }}, {{ .letter.SendCount }})">Click to Send Email</button>
+      <ol>
+        <li>
+          <button onclick="sendEmail({{ .letter.ID }}, {{ .letter.SendCount }})">Click to Send Email</button>
+        </li>
+        <li>
+          <a class="twitter-share-button" href="https://twitter.com/intent/tweet">Tweet</a>
+        </li>
+        <li>
+          <div id="fb-share"></div>
+        </li>
+      </ol>
     </nav>
     <pre id="letter-preview">
       {{ template "letter-content" . }}
@@ -36,4 +47,20 @@ Sincerely,
   </section>
 </main>
 <script src="/static/js/mail_button.js"></script>
+<script>window.twttr = (function(d, s, id) {
+   var js, fjs = d.getElementsByTagName(s)[0],
+       t = window.twttr || {};
+   if (d.getElementById(id)) return t;
+   js = d.createElement(s);
+   js.id = id;
+   js.src = "https://platform.twitter.com/widgets.js";
+   fjs.parentNode.insertBefore(js, fjs);
+
+   t._e = [];
+   t.ready = function(f) {
+     t._e.push(f);
+   };
+
+   return t;
+ }(document, "script", "twitter-wjs"));</script>
 {{ end }}
