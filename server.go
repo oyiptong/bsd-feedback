@@ -239,7 +239,15 @@ func main() {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, letters)
+
+		anonymized := letters[:0]
+		for _, letter := range letters {
+			letter.ID = "***"
+			letter.Name = "***"
+			letter.Email = "***@***.com"
+			anonymized = append(anonymized, letter)
+		}
+		c.JSON(http.StatusOK, anonymized)
 	})
 
 	r.POST("/", func(c *gin.Context) {
