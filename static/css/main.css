@@ -308,15 +308,19 @@ section > label, section legend {
     margin-bottom: 16px;
 }
 
-section > input[type=text], section > input[type=email], section > input[type=number] {
+section > input[type=text], section > input[type=email], section > input[type=number], article > input[type=text] {
     border: none;
     border-bottom: 1px solid #dadce0;
 }
 
-section > input[type=text]:focus, section > input[type=email]:focus, section > input[type=number]:focus {
+section > input[type=text]:focus, section > input[type=email]:focus, section > input[type=number]:focus, article > input[type=text]:focus {
     border: none;
     outline: none;
     border-bottom: 1px solid #000;
+}
+
+article > input[type=text] {
+    width: 100%;
 }
 
 input[type=checkbox] {

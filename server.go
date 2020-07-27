@@ -67,6 +67,7 @@ type LetterForm struct {
 	Concerns        []string `form:"concerns" json:"concerns" binding:"required"`
 	SchoolsChecked  map[string]bool
 	ConcernsChecked map[string]bool
+	FreeForm        string `form:"freeform" json:"freeform"`
 }
 
 type Letter struct {
@@ -77,6 +78,7 @@ type Letter struct {
 	NumChildren  int            `json:"numChildren"`
 	Schools      []School       `json:schools`
 	Concerns     []Concern      `json:concerns`
+	FreeForm     string         `json:freeForm`
 	CreatedAt    time.Time      `json:createdAt`
 	SendCount    int            `json:sendCount`
 	SentReceipts []time.Time    `json:sentReceipts`
@@ -92,6 +94,7 @@ func formToLetter(form LetterForm) Letter {
 	letter.Email = form.Email
 	letter.Name = form.Name
 	letter.NumChildren = form.NumChildren
+	letter.FreeForm = form.FreeForm
 	for _, slug := range form.Schools {
 		letter.Schools = append(letter.Schools, schoolDB[slug])
 	}
@@ -109,6 +112,7 @@ func letterToForm(letter Letter) LetterForm {
 	form.Email = letter.Email
 	form.Name = letter.Name
 	form.NumChildren = letter.NumChildren
+	form.FreeForm = letter.FreeForm
 	for _, school := range letter.Schools {
 		// Replace slug with name.
 		form.Schools = append(form.Schools, school.Slug)
@@ -181,12 +185,12 @@ func main() {
 		},
 		Concern{
 			"Have our teachers been heard?",
-			template.HTML("How did the administration and teachers work collaboratively on the proposed plans? How do we (as parents) know  teachers approve and support the hybrid model and its potential for success for students continuing to learn remotely and those returning to the classroom?  What surveys or polls have the district used to gage how teachers are feeling about the potential reopening of schools? Please provide details on why the plan has been laid out the way it is presented so that we can have a better understanding of the considerations, safety precautions and programs that are being put in place."),
+			template.HTML("How did the administration and teachers work collaboratively on the proposed plans? How do we (as parents) know teachers approve and support the hybrid model and its potential for success for students continuing to learn remotely and those returning to the classroom? What surveys or polls have the district used to gage how teachers are feeling about the potential reopening of schools? Please provide details on why the plan has been laid out the way it is presented so that we can have a better understanding of the considerations, safety precautions and programs that are being put in place."),
 			"teachers-heard",
 		},
 		Concern{
 			"What will Distance Learning Look Like?",
-			template.HTML("Why did the school district decide to open with a hybrid model while infection rate is increasing, instead of starting with distance learning and slowly easing into the hybrid model with a phased approach like other districts within the county? The administration  mentions SB 98 limits the district’s ability to offer distance learning as a stand-alone model except on a per-parent request for medical necessity or if determined necessary by a local health agency. How then are other SMC districts, such as Millbrae, Menlo Park and SMFCSD, planning to start the year 100% distance learning then phasing in hybrid? With the inevitability of a second Covid wave and the annual flu season coming, distance learning will likely be with us in some form for the foreseeable future.  What has the district learned from the spring to improve upon the distance learning curriculum and experience to have consistency for all BSD students?"),
+			template.HTML("Why did the school district decide to open with a hybrid model while infection rate is increasing, instead of starting with distance learning and slowly easing into the hybrid model with a phased approach like other districts within the county? The administration mentions SB 98 limits the district’s ability to offer distance learning as a stand-alone model except on a per-parent request for medical necessity or if determined necessary by a local health agency. How then are other SMC districts, such as Millbrae, Menlo Park and SMFCSD, planning to start the year 100% distance learning then phasing in hybrid? With the inevitability of a second Covid wave and the annual flu season coming, distance learning will likely be with us in some form for the foreseeable future. What has the district learned from the spring to improve upon the distance learning curriculum and experience to have consistency for all BSD students?"),
 			"distance-learning",
 		},
 		Concern{

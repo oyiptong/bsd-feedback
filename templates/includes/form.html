@@ -74,6 +74,11 @@
         <label for="{{ .Slug }}">Pick this concern</label>
       </article>
       {{ end }}
+
+      <article>
+        <header>Any additional feedback (free-form)</header>
+        <input id="freeform" type="text" name="freeform" value="{{ .form.FreeForm }}" maxlength="300" />
+      </article>
     </fieldset>
   </section>
 
