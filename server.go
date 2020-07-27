@@ -39,7 +39,12 @@ func init() {
 			config.Port = p
 		}
 	}
-	config.GCPProject = os.Getenv("GCP_PROJECT")
+	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	if projectID == "" {
+		projectID = os.Getenv("GCP_PROJECT")
+	}
+
+	config.GCPProject = projectID
 }
 
 type School struct {
